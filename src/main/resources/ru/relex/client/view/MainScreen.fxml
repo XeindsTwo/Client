@@ -22,7 +22,7 @@
           <TableColumn fx:id="bookAuthor" prefWidth="75.0" text="Название" />
             <TableColumn fx:id="bookPublisher" prefWidth="75.0" text="Издательство" />
             <TableColumn fx:id="bookYear" prefWidth="75.0" text="Год выпуска" />
-            <TableColumn fx:id="bookChapter" prefWidth="75.0" text="Раздел" />
+            <TableColumn fx:id="bookChapter" prefWidth="75.0" text="Жанр книги" />
             <TableColumn fx:id="bookId" prefWidth="75.0" text="Автор" visible="false" />
         </columns>
          <columnResizePolicy>
@@ -31,22 +31,22 @@
       </TableView>
       <ButtonBar layoutX="437.0" layoutY="533.0" prefHeight="84.0" prefWidth="611.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <buttons>
-          <Button fx:id="buttonAddBook" mnemonicParsing="false" onAction="#addBook" prefHeight="40.0" prefWidth="120.0" text="Добавить">
+          <Button fx:id="buttonAddBook" mnemonicParsing="false" onAction="#clickAddBook" prefHeight="40.0" prefWidth="120.0" text="Добавить">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" onAction="#editBook" prefHeight="40.0" prefWidth="139.0" text="Редактировать">
+            <Button mnemonicParsing="false" onAction="#clickEditBook" prefHeight="40.0" prefWidth="139.0" text="Редактировать">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Button>
-            <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="120.0" text="Дублировать">
+            <Button mnemonicParsing="false" onAction="#clickDuplicateBook" prefHeight="40.0" prefWidth="120.0" text="Дублировать">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Button>
-            <Button fx:id="buttonDeleteBook" mnemonicParsing="false" onAction="#deleteBook" prefHeight="40.0" prefWidth="120.0" text="Удалить">
+            <Button fx:id="buttonDeleteBook" mnemonicParsing="false" onAction="#clickDeleteBook" prefHeight="40.0" prefWidth="120.0" text="Удалить">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>

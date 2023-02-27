@@ -9,7 +9,6 @@ module ru.relex.client {
     exports ru.relex.client.controller;
     exports ru.relex.client.Entity;
     exports ru.relex.client.Response;
-    exports ru.relex.client.Service;
     exports ru.relex.client.Utils;
 
     opens ru.relex.client to javafx.fxml;

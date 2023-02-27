@@ -45,7 +45,7 @@
                         <Font name="System Bold" size="18.0" />
                     </font>
                 </Label>
-                <Label text="Раздел в библиотеке" GridPane.rowIndex="4">
+                <Label text="Жанр книги" GridPane.rowIndex="4">
                     <font>
                         <Font name="System Bold" size="18.0" />
                     </font>
@@ -60,12 +60,12 @@
                 <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
             </padding>
         </GridPane>
-        <Button fx:id="buttonSaveBook" layoutX="420.0" layoutY="279.0" mnemonicParsing="false" onAction="#saveBook" text="Сохранить">
+        <Button fx:id="buttonSaveBook" layoutX="410.0" layoutY="279.0" mnemonicParsing="false" onAction="#saveBook" text="Сохранить">
             <font>
                 <Font size="14.0" />
             </font>
         </Button>
-        <Button fx:id="buttonCloseWindow" layoutX="518.0" layoutY="279.0" mnemonicParsing="false" onAction="#closeWindow" text="Закрыть">
+        <Button fx:id="buttonCloseWindow" layoutX="508.0" layoutY="279.0" mnemonicParsing="false" onAction="#closeWindow" text="Отменить">
             <font>
                 <Font size="14.0" />
             </font>

@@ -13,15 +13,13 @@ import ru.relex.client.controller.MainScreenController;
 import java.io.IOException;
 
 public class MainApp extends Application {
-    private AnchorPane rootLayout;
-    private Stage dialogStage;
 
     @Override
     public void start(Stage stage) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/MainScreen.fxml"));
-            rootLayout = (AnchorPane) loader.load();
+            AnchorPane rootLayout = loader.load();
 
             Scene scene = new Scene(rootLayout);
             stage.setScene(scene);
@@ -35,13 +33,14 @@ public class MainApp extends Application {
         }
     }
 
-    public static boolean showPersonEditDialog(BookEntity bookObject, Long id) {
+    public static boolean showPersonEditDialog(BookEntity book) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/EditBook.fxml"));
-            AnchorPane anchorPane = (AnchorPane) loader.load();
+            AnchorPane anchorPane = loader.load();
 
             Stage dialogStage = new Stage();
+            dialogStage.setResizable(false);
             dialogStage.setTitle("Редактирование книги");
             dialogStage.initModality(Modality.APPLICATION_MODAL);
 
@@ -49,8 +48,8 @@ public class MainApp extends Application {
             dialogStage.setScene(scene);
 
             EditBookController controller = loader.getController();
-            controller.setDialogStage(dialogStage);
-            controller.setLabels(bookObject, id);
+            controller.setEditDialogStage(dialogStage);
+            controller.setLabels(book);
 
             dialogStage.showAndWait();
             return controller.isOkClicked();

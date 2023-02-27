@@ -2,35 +2,38 @@ package ru.relex.client.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
+import lombok.Setter;
 import ru.relex.client.Entity.BookEntity;
 import ru.relex.client.MainApp;
-import ru.relex.client.Utils.HTTPUtils;
+import ru.relex.client.Utils.AlertUtils;
+import ru.relex.client.Utils.ValidationBookUtils;
+import ru.relex.client.dao.BookDao;
 
 import java.io.IOException;
 
-
 public class MainScreenController {
     public static ObservableList<BookEntity> booksData = FXCollections.observableArrayList();
-    public static String api = "http://localhost:1000/api/v1/book/";
-    static HTTPUtils http = new HTTPUtils();
+    public final static String api = "http://localhost:1000/api/v1/book/";
+
+    AlertUtils alerts = new AlertUtils();
     static Gson gson = new Gson();
+
+    @Setter
+    private Stage stage;
 
     @FXML
     private TableView<BookEntity> tableBooks;
     @FXML
     private TableColumn<BookEntity, String> bookAuthor;
-
-    @FXML
-    private TableColumn<BookEntity, Long> bookId;
 
     @FXML
     private TableColumn<BookEntity, String> bookChapter;
@@ -45,79 +48,88 @@ public class MainScreenController {
     private TableColumn<BookEntity, String> bookYear;
 
     @FXML
-    private void initialize() throws Exception {
-        getData();
-        updateTable();
-    }
-
-    @FXML
-    private void addBook(ActionEvent event) throws IOException {
-        BookEntity tempBook = new BookEntity();
-        booksData.add(tempBook);
-        MainApp.showPersonEditDialog(tempBook, Long.valueOf(booksData.size() - 1));
-        addBook(tempBook);
-    }
-
-    @FXML
-    private void deleteBook(ActionEvent event) throws IOException {
-        BookEntity selectedBook = tableBooks.getSelectionModel().getSelectedItem();
-        if (selectedBook != null) {
-            System.out.println(http.delete("http://localhost:1000/api/v1/book/delete/",
-                    String.valueOf(tableBooks.getSelectionModel().getSelectedItem().getId())));
-            booksData.remove(selectedBook);
-        } else {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Не выбран элемент списка");
-            alert.setHeaderText("Отсутствует выбранная книга из списка");
-            alert.setContentText("Пожалуйста, выберите книгу из списка приложения");
-            alert.showAndWait();
+    private void initialize() {
+        try {
+            getData();
+            updateTable();
+        } catch (IOException e) {
+            alerts.serverNotRun(stage);
+            System.exit(0);
         }
     }
 
     @FXML
-    private void editBook(ActionEvent event) throws IOException {
+    private void clickAddBook() throws IOException {
+        BookEntity book = BookEntity.getNullObject();
+        MainApp.showPersonEditDialog(book);
+        if (ValidationBookUtils.validateBook(book)) {
+            addBook(book);
+        }
+    }
+
+    @FXML
+    private void clickDeleteBook() throws IOException {
         BookEntity selectedBook = tableBooks.getSelectionModel().getSelectedItem();
         if (selectedBook != null) {
-            MainApp.showPersonEditDialog(selectedBook, Long.valueOf(booksData.indexOf(selectedBook)));
+            BookDao.deleteBook(selectedBook);
+            booksData.remove(selectedBook);
         } else {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Не выбран элемент списка");
-            alert.setHeaderText("Отсутствует выбранная книга из списка");
-            alert.setContentText("Пожалуйста, выберите книгу из списка приложения");
-            alert.showAndWait();
+            alerts.showNotSelected();
+        }
+    }
+
+    @FXML
+    private void clickDuplicateBook() throws IOException {
+        BookEntity selectedBook = tableBooks.getSelectionModel().getSelectedItem();
+        if (selectedBook != null) {
+            BookEntity clonedBook = selectedBook.clone();
+            clonedBook.setId(null);
+            addBook(clonedBook);
+        } else {
+            alerts.showNotSelected();
+        }
+    }
+
+    @FXML
+    private void clickEditBook() throws IOException {
+        BookEntity selectedBook = tableBooks.getSelectionModel().getSelectedItem();
+        if (selectedBook != null) {
+            MainApp.showPersonEditDialog(selectedBook);
+            updateBook(selectedBook);
+        } else {
+            alerts.showNotSelected();
         }
     }
 
     private void updateTable() {
-        bookId.setCellValueFactory(new PropertyValueFactory<BookEntity, Long>("id"));
-        bookName.setCellValueFactory(new PropertyValueFactory<BookEntity, String>("title"));
-        bookAuthor.setCellValueFactory(new PropertyValueFactory<BookEntity, String>("author"));
-        bookPublisher.setCellValueFactory(new PropertyValueFactory<BookEntity, String>("publishing"));
-        bookYear.setCellValueFactory(new PropertyValueFactory<BookEntity, String>("year"));
-        bookChapter.setCellValueFactory(new PropertyValueFactory<BookEntity, String>("typeBook"));
+        bookName.setCellValueFactory(new PropertyValueFactory<>("title"));
+        bookAuthor.setCellValueFactory(new PropertyValueFactory<>("author"));
+        bookPublisher.setCellValueFactory(new PropertyValueFactory<>("publishing"));
+        bookYear.setCellValueFactory(new PropertyValueFactory<>("year"));
+        bookChapter.setCellValueFactory(new PropertyValueFactory<>("typeBook"));
         tableBooks.setItems(booksData);
     }
 
-    public static void getData() throws Exception {
-        String result = http.get(api, "all");
-        System.out.println(result);
-
-        JsonObject base = gson.fromJson(result, JsonObject.class);
+    public static void getData() throws IOException {
+        String response = BookDao.getBooks();
+        JsonObject base = gson.fromJson(response, JsonObject.class);
         JsonArray jsonArray = base.getAsJsonArray("data");
-
-        for (int i = 0; i < jsonArray.size(); i++) {
-            BookEntity newBook = gson.fromJson(jsonArray.get(i).toString(), BookEntity.class);
+        for (JsonElement element : jsonArray) {
+            BookEntity newBook = gson.fromJson(element.toString(), BookEntity.class);
             booksData.add(newBook);
         }
     }
 
     public static void addBook(BookEntity book) throws IOException {
-        System.out.println(book.toString());
-        book.setId(null);
-        http.post(api + "add", gson.toJson(book).toString());
+        Long id = BookDao.sendBookAndGetData(book).getId();
+        book.setId(id);
+        booksData.add(book);
+        System.out.println(book);
     }
 
     public static void updateBook(BookEntity book) throws IOException {
-        http.put(api + "update", gson.toJson(book).toString());
+        BookDao.updateBook(book);
+        int bookIndex = booksData.indexOf(book);
+        booksData.set(bookIndex, book);
     }
 }
